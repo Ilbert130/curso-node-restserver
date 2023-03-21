@@ -1,14 +1,16 @@
 const { response, request } = require('express');
+//El archivo de ruta tiene que llamarse igual que el controlador
 
 
 //GET
-const usuariosGet = (req = request, res = response) =>{
+const usuariosGet = (req = request, res = response) =>{  //Esto lo hacemos para tipar nuestros parametros y acceder facilmente a las funciones
     
     //Para obtener los querys que vienen en la ruta de nuestra peticion
     //api/usuarios?q=hola&nombre=ilbert&apikey=234324234 ejemplo de querys
     // const query = req.query;
     const {q, nombre = 'no name', apikey, page = 1, limit} = req.query;
 
+    
     res.json({
         msg: 'get API - Controlador',
         q,
@@ -26,6 +28,7 @@ const usuariosPut = (req, res) =>{
     //req.params.id //Tambien podemos acceder a ellos de manera individual
     const  {id} = req.params;
 
+    //Respuesta en json
     res.json({
         msg: 'put API - Controlador',
         id: id
