@@ -1,5 +1,9 @@
-const { response, request } = require('express');
 //El archivo de ruta tiene que llamarse igual que el controlador
+const { response, request } = require('express');
+const Usuario = require('../models/usuario');               //Creacion de la instancia del modelo
+const bcryptjs = require('bcryptjs');                       //para incriptar la password
+// const { validationResult } = require('express-validator');  //para validar los errores mandados por los middlewares de validacion
+
 
 
 //GET
@@ -36,16 +40,24 @@ const usuariosPut = (req, res) =>{
 }
 
 //POST
-const usuarioPost = (req, res) =>{
+const usuarioPost = async (req, res) =>{
 
     //const body = req.body;  //con este manera nos trae todo el body
     //Si lo hacemos de la manera de abajo evitamos obtener informacion inecesaria. Obteniendo solo lo que queremos.
-    const {nombre, edad} = req.body;
+    const {nombre, correo, password, rol} = req.body;
+    const usuario = new Usuario({nombre, correo, password, rol}); //creamos nuestra instancia y le pasamos body del req
 
+    //Encriptar la password
+    const salt = bcryptjs.genSaltSync();  //SALT to create the pattern to encript the password
+    usuario.password = bcryptjs.hashSync(password, salt);
+
+    //guardamos los datos en la db
+    await usuario.save();
+
+    //devolvemos una respusta de la creacion
     res.status(201).json({
         msg: 'post API - Controler',
-        nombre: nombre,
-        edad: edad
+        usuario: usuario
     });
 }
 
