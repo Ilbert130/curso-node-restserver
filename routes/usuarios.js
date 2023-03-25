@@ -1,7 +1,7 @@
 const { Router } = require('express'); //Requerimos la funcion para rutear
 const { check } = require('express-validator'); //check de express-validation para hacer las validaciones
 const { usuariosGet, usuariosPut, usuarioPost, usuarioDelete, usuariosPatch } = require('../Controllers/usuarios');
-const { esRoleValido, existeCorreo } = require('../helpers/db-validators');
+const { esRoleValido, existeCorreo, existeUsuarioPorId } = require('../helpers/db-validators');
 const { validarCampos } = require('../middlewares/validar-campos'); //middleware de revision
 
 
@@ -12,7 +12,12 @@ const router = Router();
 router.get('/', usuariosGet);
 
 //Asi mandamos parametros en javascript configurando la ruta
-router.put('/:id', usuariosPut);
+router.put('/:id', [
+    check('id', 'No es un id valido').isMongoId(),//validacion del id
+    check('id').custom(id => existeUsuarioPorId(id)),
+    check('rol').custom((rol) => esRoleValido(rol)),
+    validarCampos  //Este metodo se llama luego de hacer las validaciones para validar los campos
+],usuariosPut);
 
 //con dos parametros el sugundo es el callback del endpoint 
 //con tres parametros el segundo es middleware de validacion
@@ -28,7 +33,11 @@ router.post('/', [
     validarCampos
 ], usuarioPost);
 
-router.delete('/', usuarioDelete);
+router.delete('/:id',[
+    check('id', 'No es un id valido').isMongoId(),//validacion del id
+    check('id').custom(id => existeUsuarioPorId(id)),
+    validarCampos
+], usuarioDelete);
 
 router.patch('/', usuariosPatch);
 
