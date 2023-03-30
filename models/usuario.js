@@ -37,7 +37,8 @@ const UsuarioSchema = Schema({
 //Con este metodo sacamos la propiedad version y password de nuestro retorno
 //Esto pasa cuando se llama el metodo toJSON, porque sobre escribimos este
 UsuarioSchema.methods.toJSON = function() {
-    const {__v, password, ...usuario} = this.toObject();
+    const {__v, password, _id, ...usuario} = this.toObject();
+    usuario.uid = _id; //Cambiando el nombre de _id por uid / creando la propiedad de uid
     return usuario;
 }
 

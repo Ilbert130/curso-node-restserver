@@ -2,7 +2,11 @@ const { Router } = require('express'); //Requerimos la funcion para rutear
 const { check } = require('express-validator'); //check de express-validation para hacer las validaciones
 const { usuariosGet, usuariosPut, usuarioPost, usuarioDelete, usuariosPatch } = require('../Controllers/usuarios');
 const { esRoleValido, existeCorreo, existeUsuarioPorId } = require('../helpers/db-validators');
-const { validarCampos } = require('../middlewares/validar-campos'); //middleware de revision
+const {validarCampos, validarJWT, esAdminRole, tieneRole} = require('../middlewares'); //Importando el index de la carpeta middleware
+
+// const { validarCampos } = require('../middlewares/validar-campos'); //middleware de revision
+// const { validarJWT } = require('../middlewares/validar-jwt');
+// const { esAdminRole, tieneRole } = require('../middlewares/validar-roles');
 
 
 const router = Router();
@@ -34,7 +38,11 @@ router.post('/', [
 ], usuarioPost);
 
 router.delete('/:id',[
-    check('id', 'No es un id valido').isMongoId(),//validacion del id
+    validarJWT,                                     //Agregando la validacion de que si tiene un JWT valido
+    // esAdminRole,                                    //middleware para validar el rol de usuario. Resive la informacion del usuario del primer middleware
+    //Esto es una funcion que devulve un middleware, por eso se puede ejecutar. Resivir argumentos en los middlewares
+    tieneRole('ADMIN_ROLE', 'VENTAS_ROLE'),         //Validacion de multiples roles de manera simultanea
+    check('id', 'No es un id valido').isMongoId(),  //validacion del id
     check('id').custom(id => existeUsuarioPorId(id)),
     validarCampos
 ], usuarioDelete);

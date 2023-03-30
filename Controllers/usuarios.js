@@ -87,14 +87,18 @@ const usuarioPost = async (req, res) =>{
 const usuarioDelete = async (req, res) =>{
 
     const {id} = req.params;
+
+    // const uid = req.uid;
     
     //fisicamente lo borramos
     // const usuario = await Usuario.findByIdAndDelete(id);
 
     const usuario = await Usuario.findByIdAndUpdate(id, {estado: false}); //Actulizando el estado para eliminar el registro sin quitarlo de la base de datos
+    // const usuarioAutenticado = req.usuario;  //Obtenemos la informacion del objeto req
 
     res.json({
-        usuario
+        usuario,
+        // usuarioAutenticado
     });
 }
 
