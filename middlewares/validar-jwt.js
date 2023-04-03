@@ -6,7 +6,7 @@ const Usuario = require('../models/usuario');
 const validarJWT = async(req = request, res = response, next) => {
 
     //Obteniendo el jwt del header del request
-    const token = req.header('x-token');
+    const token = req.header('x-token');                //Asi accedemos a los headers que vienen en el request
 
     if(!token){
         return res.status(401).json({

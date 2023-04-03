@@ -1,4 +1,4 @@
-const { response, request } = require("express")
+const { response, request } = require('express');
 
 //Middleware para validar el rol del usuario para hacer la accion
 const esAdminRole = (req = request, res = response, next) => {
