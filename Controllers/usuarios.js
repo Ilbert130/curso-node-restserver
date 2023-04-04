@@ -27,7 +27,7 @@ const usuariosGet = async(req = request, res = response) =>{  //Esto lo hacemos 
 
     //ejecutando promesas de manera simultania y destructurando su resultado
     const [usuarios, total] = await Promise.all([
-        Usuario.find(query).skip(+desde).limit(+desde),
+        Usuario.find(query).skip(+desde).limit(+limite),
         Usuario.countDocuments(query)
     ]);
     
@@ -53,7 +53,7 @@ const usuariosPut = async(req, res) =>{
         resto.password = bcryptjs.hashSync(password, salt);
     }
     
-    const usuario = await Usuario.findByIdAndUpdate(id, resto);
+    const usuario = await Usuario.findByIdAndUpdate(id, resto, {new: true});
 
     //Respuesta en json
     res.json({
@@ -93,7 +93,7 @@ const usuarioDelete = async (req, res) =>{
     //fisicamente lo borramos
     // const usuario = await Usuario.findByIdAndDelete(id);
 
-    const usuario = await Usuario.findByIdAndUpdate(id, {estado: false}); //Actulizando el estado para eliminar el registro sin quitarlo de la base de datos
+    const usuario = await Usuario.findByIdAndUpdate(id, {estado: false}, {new: true}); //Actulizando el estado para eliminar el registro sin quitarlo de la base de datos
     // const usuarioAutenticado = req.usuario;  //Obtenemos la informacion del objeto req
 
     res.json({

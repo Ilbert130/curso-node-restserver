@@ -8,8 +8,12 @@ class Server {
     constructor(){
         this.app = express();
         this.port = process.env.PORT || 3000;
-        this.usuariosPath = '/api/usuarios';
-        this.authPath = '/api/auth';                //Ruta de autenticacion
+        this.paths = {
+            auth:       '/api/auth',                  //Ruta de autenticacion
+            usuarios:   '/api/usuarios',
+            categorias: '/api/categorias',
+            productos: '/api/productos'
+        }            
 
         //Conectar a la base de datos
         this.conectarDB();
@@ -44,9 +48,13 @@ class Server {
     routes(){
         
         //Determinando la ruta de autenticacion
-        this.app.use(this.authPath, require('../routes/auth'));
+        this.app.use(this.paths.auth, require('../routes/auth'));
         //Determinando la ruta de ese controlador
-        this.app.use(this.usuariosPath, require('../routes/usuarios'));
+        this.app.use(this.paths.usuarios, require('../routes/usuarios'));
+        //Determinando la ruta de ese controlador
+        this.app.use(this.paths.categorias, require('../routes/categorias'));
+        //Determinando la ruta de ese controlador
+        this.app.use(this.paths.productos, require('../routes/productos'));
     }
     
     //Escucha de nuestra applicacion
