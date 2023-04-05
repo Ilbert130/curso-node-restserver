@@ -12,7 +12,8 @@ class Server {
             auth:       '/api/auth',                  //Ruta de autenticacion
             usuarios:   '/api/usuarios',
             categorias: '/api/categorias',
-            productos: '/api/productos'
+            productos:  '/api/productos',
+            buscar:     '/api/buscar'
         }            
 
         //Conectar a la base de datos
@@ -55,6 +56,8 @@ class Server {
         this.app.use(this.paths.categorias, require('../routes/categorias'));
         //Determinando la ruta de ese controlador
         this.app.use(this.paths.productos, require('../routes/productos'));
+        //Determinando la ruta de ese controlador
+        this.app.use(this.paths.buscar, require('../routes/buscar'));
     }
     
     //Escucha de nuestra applicacion

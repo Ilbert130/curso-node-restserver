@@ -42,7 +42,7 @@ const existeProducto = async(id) => {
 
 //validar si el producto existe por nombre
 const existeProductoNombre = async(nombre) => {
-    const existeProducto = await Producto.find({nombre: nombre.toUpperCase()});
+    const existeProducto = await Producto.findOne({nombre: nombre.toUpperCase()});
     if(existeProducto){
         throw new Error(`El producto ${nombre} ya existe`);
     }
