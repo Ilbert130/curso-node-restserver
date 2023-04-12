@@ -1,51 +1,55 @@
 const { response, request } = require('express');
-const jwt = require('jsonwebtoken'); 
-const Usuario = require('../models/usuario'); 
+const jwt = require('jsonwebtoken');
 
-//Middleware para validar el JWT en la peticion delete. Protegiendo esta ruta
-const validarJWT = async(req = request, res = response, next) => {
+const Usuario = require('../models/usuario');
 
-    //Obteniendo el jwt del header del request
-    const token = req.header('x-token');                //Asi accedemos a los headers que vienen en el request
 
-    if(!token){
+const validarJWT = async( req = request, res = response, next ) => {
+
+    const token = req.header('x-token');
+
+    if ( !token ) {
         return res.status(401).json({
-            msg: 'No hay token en la peticion'
+            msg: 'No hay token en la petición'
         });
     }
 
     try {
         
-        //Esta funcion sirve para verificar el jwt. Verificar si es valido y nos devuelve el payload como un objeto
-        const { uid } = jwt.verify(token, process.env.SECRETORPRIVATEKY);
+        const { uid } = jwt.verify( token, process.env.SECRETORPRIVATEKEY );
 
-        const usuario = await Usuario.findOne({_id: uid}); //Buscando la informacion del usuario que hace la accion
-        if(!usuario){
+        // leer el usuario que corresponde al uid
+        const usuario = await Usuario.findById( uid );
+
+        if( !usuario ) {
             return res.status(401).json({
-                msg: 'Token no valido - usuario no existe DB'
-            });
+                msg: 'Token no válido - usuario no existe DB'
+            })
         }
 
-        //verificar si el uid tiene estado en true
-        if(!usuario.estado){
+        // Verificar si el uid tiene estado true
+        if ( !usuario.estado ) {
             return res.status(401).json({
-                msg: 'Token no valido - usuario con estado false'
-            });
+                msg: 'Token no válido - usuario con estado: false'
+            })
         }
-
-        //Creando un uid el objeto req y pasandole el valor del uid que hizo la accion
-        // req.uid = uid;
-
-        req.usuario = usuario; //Creamos una propiedad usuario en el objeto req
+        
+        
+        req.usuario = usuario;
         next();
+
     } catch (error) {
 
         console.log(error);
         res.status(401).json({
-            msg: 'Token no valido'
-        });
+            msg: 'Token no válido'
+        })
     }
+
 }
+
+
+
 
 module.exports = {
     validarJWT

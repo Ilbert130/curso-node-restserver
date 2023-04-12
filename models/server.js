@@ -1,71 +1,80 @@
-const express = require('express');  //Express and cors require
+const express = require('express');
 const cors = require('cors');
-const {dbConnection} = require('../database/config');
+const fileUpload = require('express-fileupload');
 
+const { dbConnection } = require('../database/config');
 
 class Server {
 
-    constructor(){
-        this.app = express();
-        this.port = process.env.PORT || 3000;
+    constructor() {
+        this.app  = express();
+        this.port = process.env.PORT;
+
         this.paths = {
-            auth:       '/api/auth',                  //Ruta de autenticacion
-            usuarios:   '/api/usuarios',
+            auth:       '/api/auth',
+            buscar:     '/api/buscar',
             categorias: '/api/categorias',
             productos:  '/api/productos',
-            buscar:     '/api/buscar'
-        }            
+            usuarios:   '/api/usuarios',
+            uploads:    '/api/uploads'
+        }
 
-        //Conectar a la base de datos
+
+        // Conectar a base de datos
         this.conectarDB();
 
-        //Middlewares
+        // Middlewares
         this.middlewares();
 
-        //Rutas de mi aplicacion
+        // Rutas de mi aplicación
         this.routes();
     }
 
-    //Conexion a base de datos
-    async conectarDB(){
+    async conectarDB() {
         await dbConnection();
     }
 
-    //Configuracion de middlewars
-    middlewares(){
 
-        //CORS
-        this.app.use(cors());
+    middlewares() {
 
-        //Parseo y lectura del body a JSON
-        this.app.use(express.json());
+        // CORS
+        this.app.use( cors() );
 
-        //Directorio Publico, determinandolo como principal en la ruta / del proyecto
-        //recursos staticos
-        this.app.use(express.static('public'));
+        // Lectura y parseo del body
+        this.app.use( express.json() );
+
+        // Directorio Público
+        this.app.use( express.static('public') );
+
+        //FileUpload - Manejar carga de archivos
+        // Note that this option available for versions 1.0.0 and newer. 
+        this.app.use(fileUpload({
+            useTempFiles : true,
+            tempFileDir : '/tmp/',
+            createParentPath: true  //para crear directorios si no existen
+        }));
+
     }
 
-    //Configuracion de rutas
-    routes(){
+    routes() {
         
-        //Determinando la ruta de autenticacion
-        this.app.use(this.paths.auth, require('../routes/auth'));
-        //Determinando la ruta de ese controlador
-        this.app.use(this.paths.usuarios, require('../routes/usuarios'));
-        //Determinando la ruta de ese controlador
-        this.app.use(this.paths.categorias, require('../routes/categorias'));
-        //Determinando la ruta de ese controlador
-        this.app.use(this.paths.productos, require('../routes/productos'));
-        //Determinando la ruta de ese controlador
-        this.app.use(this.paths.buscar, require('../routes/buscar'));
+        this.app.use( this.paths.auth, require('../routes/auth'));
+        this.app.use( this.paths.buscar, require('../routes/buscar'));
+        this.app.use( this.paths.categorias, require('../routes/categorias'));
+        this.app.use( this.paths.productos, require('../routes/productos'));
+        this.app.use( this.paths.usuarios, require('../routes/usuarios'));
+        this.app.use( this.paths.uploads, require('../routes/uploads'));
     }
-    
-    //Escucha de nuestra applicacion
-    listen(){
-        this.app.listen(this.port, () => {
-            console.log('Servidor corriendo en puerto', this.port);
+
+    listen() {
+        this.app.listen( this.port, () => {
+            console.log('Servidor corriendo en puerto', this.port );
         });
     }
+
 }
+
+
+
 
 module.exports = Server;

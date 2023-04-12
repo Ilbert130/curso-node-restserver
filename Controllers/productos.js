@@ -1,22 +1,19 @@
-const { request, response } = require("express");
-const { Producto } = require("../models");
+const { response } = require('express');
+const { Producto } = require('../models');
 
 
+const obtenerProductos = async(req, res = response ) => {
 
-//GET
-const obtenerProductos = async(req = request, res = response) => {
+    const { limite = 5, desde = 0 } = req.query;
+    const query = { estado: true };
 
-    //Crear paginacion
-    const {limite = 5, desde = 0} = req.query;
-    const query = {estado: true};
-
-    //Populations Parameters
-    const populateUsuario = ['nombre', 'correo', 'rol', 'uid'];
-
-    //Obteniendo los productos y el total
-    const [productos, total] = await Promise.all([
-        Producto.find(query).populate('usuario', populateUsuario).populate('categoria', 'nombre').skip(+desde).limit(+limite),
-        Producto.countDocuments(query)
+    const [ total, productos ] = await Promise.all([
+        Producto.countDocuments(query),
+        Producto.find(query)
+            .populate('usuario', 'nombre')
+            .populate('categoria', 'nombre')
+            .skip( Number( desde ) )
+            .limit(Number( limite ))
     ]);
 
     res.json({
@@ -25,97 +22,77 @@ const obtenerProductos = async(req = request, res = response) => {
     });
 }
 
-//GET
-const obtenerProducto = async(req= request, res= response) => {
+const obtenerProducto = async(req, res = response ) => {
 
-    const {id} = req.params;
-    const query = {estado: true};
+    const { id } = req.params;
+    const producto = await Producto.findById( id )
+                            .populate('usuario', 'nombre')
+                            .populate('categoria', 'nombre');
 
-    //Populations Parameters
-    const populateUsuario = ['nombre', 'correo', 'rol', 'uid'];
+    res.json( producto );
 
-    const [producto, total] = await Promise.all([
-        Producto.findById(id).populate('usuario', populateUsuario).populate('categoria', 'nombre'),
-        Producto.countDocuments(query)
-    ]);
-
-    res.json({
-        total,
-        producto
-    });
 }
 
+const crearProducto = async(req, res = response ) => {
 
-//POST
-const crearProducto = async(req = request, res = response) => {
+    const { estado, usuario, ...body } = req.body;
 
-    //Obtener la data del producto
-    const {nombre, precio, categoria, descripcion} = req.body;
+    const productoDB = await Producto.findOne({ nombre: body.nombre });
 
-    //Generar la data a guardar
-    const data = {
-        nombre: nombre.toUpperCase(),
-        usuario: req.usuario._id,
-        precio,
-        categoria,
-        descripcion
+    if ( productoDB ) {
+        return res.status(400).json({
+            msg: `El producto ${ productoDB.nombre }, ya existe`
+        });
     }
 
-    //Creando un producto
-    const producto = new Producto(data);
+    // Generar la data a guardar
+    const data = {
+        ...body,
+        nombre: body.nombre.toUpperCase(),
+        usuario: req.usuario._id
+    }
+
+    const producto = new Producto( data );
+
+    // Guardar DB
     await producto.save();
 
-    //Devolviendo el resultado de la creacion
     res.status(201).json(producto);
+
 }
 
-//PUT
-const actualizarProducto = async(req=request, res=response) => {
+const actualizarProducto = async( req, res = response ) => {
 
-    //data de los parametros
-    const {id} = req.params;
+    const { id } = req.params;
+    const { estado, usuario, ...data } = req.body;
 
-    //data del body
-    const {nombre, precio, categoria, descripcion, disponible} = req.body;
-
-    const data = {
-        nombre: nombre.toUpperCase(),
-        usuario: req.usuario._id,
-        precio,
-        categoria,
-        descripcion,
-        disponible
+    if( data.nombre ) {
+        data.nombre  = data.nombre.toUpperCase();
     }
 
-    //Actualiza y devuelve el producto
-    const producto = await Producto.findByIdAndUpdate(id, data, {new:true});
+    data.usuario = req.usuario._id;
 
-    //respuesta
-    res.json({
-        producto
-    });
+    const producto = await Producto.findByIdAndUpdate(id, data, { new: true });
+
+    res.json( producto );
+
+}
+
+const borrarProducto = async(req, res = response ) => {
+
+    const { id } = req.params;
+    const productoBorrado = await Producto.findByIdAndUpdate( id, { estado: false }, {new: true });
+
+    res.json( productoBorrado );
 }
 
 
-//DELETE
-const eleminarProducto = async(req=request, res=response) => {
-
-    const {id} = req.params;
-
-    //Borrar producto
-    const producto = await Producto.findByIdAndUpdate(id, {estado:false}, {new:true});
-
-    //respuesta
-    res.json({
-        producto
-    });
-}
 
 
 module.exports = {
+    crearProducto,
     obtenerProductos,
     obtenerProducto,
-    crearProducto,
     actualizarProducto,
-    eleminarProducto
+    borrarProducto
 }

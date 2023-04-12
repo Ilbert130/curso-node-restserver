@@ -1,10 +1,11 @@
-const { Router } = require('express'); //Requerimos la funcion para rutear
-const { buscar } = require('../Controllers/buscar');
+const { Router } = require('express');
+const { buscar } = require('../controllers/buscar');
 
 const router = Router();
 
-//GET: Ruta para hacer las busquedas en nuestra api
-router.get('/:coleccion/:termino', buscar)
+
+router.get('/:coleccion/:termino', buscar )
+
 
 
 

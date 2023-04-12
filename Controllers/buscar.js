@@ -1,125 +1,111 @@
-const { request, response } = require("express");
-const {ObjectId} = require('mongoose').Types;
-const {Usuario, Categoria, Producto} = require('../models');
+const { response } = require('express');
+const { ObjectId } = require('mongoose').Types;
 
-//Colecciones
+const { Usuario, Categoria, Producto } = require('../models');
+
 const coleccionesPermitidas = [
     'usuarios',
-    'categoria',
+    'categorias',
     'productos',
     'roles'
-]
+];
 
-//Buscar usuarios
-const buscarUsuarios = async(termino = '', res = response) => {
+const buscarUsuarios = async( termino = '', res = response ) => {
 
-    //Validando si es un id valido de mongo
-    const esMongoID = ObjectId.isValid(termino)
+    const esMongoID = ObjectId.isValid( termino ); // TRUE 
 
-    if(esMongoID){
-        //busqueda por id
+    if ( esMongoID ) {
         const usuario = await Usuario.findById(termino);
         return res.json({
-            results: (usuario) ? [usuario] : []
+            results: ( usuario ) ? [ usuario ] : []
         });
     }
 
-    //Creando expresion regular para que no sea sencible a mayuscula en las buquedas
-    const regex = new RegExp(termino, 'i');
-
-    //busqueda por nombre
+    const regex = new RegExp( termino, 'i' );
     const usuarios = await Usuario.find({
-        //Bandera en node js para usar el or dentro del find
-        $or: [{nombre: regex}, {correo: regex}],
-        //Utilizando el and
-        $and: [{estado: true}]
+        $or: [{ nombre: regex }, { correo: regex }],
+        $and: [{ estado: true }]
     });
 
     res.json({
         results: usuarios
     });
+
 }
 
-//Buscar categoria
-const buscarCategoria = async(termino = '', res = response) => {
-    
-    //Validando si es un id valido de mongo
-    const esMongoID = ObjectId.isValid(termino)
+const buscarCategorias = async( termino = '', res = response ) => {
 
-    if(esMongoID){
-        //busqueda por id
-        const categoria = await Categoria.findById(termino).populate('usuario');
+    const esMongoID = ObjectId.isValid( termino ); // TRUE 
+
+    if ( esMongoID ) {
+        const categoria = await Categoria.findById(termino);
         return res.json({
-            results: (categoria) ? [categoria] : []
+            results: ( categoria ) ? [ categoria ] : []
         });
     }
 
-    //Creando expresion regular para que no sea sencible a mayuscula en las buquedas
-    const regex = new RegExp(termino, 'i');
-
-    //busqueda por nombre
-    const categorias = await Categoria.find({nombre: regex, estado: true}).populate('usuario');
+    const regex = new RegExp( termino, 'i' );
+    const categorias = await Categoria.find({ nombre: regex, estado: true });
 
     res.json({
         results: categorias
     });
+
 }
 
-//Buscar producto
-const buscarProducto = async(termino = '', res = response) => {
-    
-    //Validando si es un id valido de mongo
-    const esMongoID = ObjectId.isValid(termino)
+const buscarProductos = async( termino = '', res = response ) => {
 
-    if(esMongoID){
-        //busqueda por id
-        const producto = await Producto.findById(termino).populate('categoria').populate('usuario');
+    const esMongoID = ObjectId.isValid( termino ); // TRUE 
+
+    if ( esMongoID ) {
+        const producto = await Producto.findById(termino)
+                            .populate('categoria','nombre');
         return res.json({
-            results: (producto) ? [producto] : []
+            results: ( producto ) ? [ producto ] : []
         });
     }
 
-    //Creando expresion regular para que no sea sencible a mayuscula en las buquedas
-    const regex = new RegExp(termino, 'i');
-
-    //busqueda por nombre
-    const productos = await Producto.find({nombre: regex, estado: true}).populate('categoria').populate('usuario');
+    const regex = new RegExp( termino, 'i' );
+    const productos = await Producto.find({ nombre: regex, estado: true })
+                            .populate('categoria','nombre')
 
     res.json({
         results: productos
     });
+
 }
 
 
-//Buscar
-const buscar = (req = request, res = response) => {
+const buscar = ( req, res = response ) => {
+    
+    const { coleccion, termino  } = req.params;
 
-    const {coleccion, termino} = req.params;
-
-    //Validando si existe la coleccion enviada
-    if(!coleccionesPermitidas.includes(coleccion)){
+    if ( !coleccionesPermitidas.includes( coleccion ) ) {
         return res.status(400).json({
-            msg: `Las colecciones permitidas son: ${coleccionesPermitidas}`
-        });
+            msg: `Las colecciones permitidas son: ${ coleccionesPermitidas }`
+        })
     }
 
     switch (coleccion) {
         case 'usuarios':
             buscarUsuarios(termino, res);
-            break;
-        case 'categoria':
-            buscarCategoria(termino, res);
-            break;
+        break;
+        case 'categorias':
+            buscarCategorias(termino, res);
+        break;
         case 'productos':
-            buscarProducto(termino, res);
-            break;
+            buscarProductos(termino, res);
+        break;
+
         default:
             res.status(500).json({
-                msg: 'Se me olvido hacer esta busqueda'
-            });
-            break;
+                msg: 'Se le olvido hacer esta búsquda'
+            })
     }
+
 }
+
+
 
 module.exports = {
     buscar
