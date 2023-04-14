@@ -16,6 +16,9 @@ const ProductoSchema = Schema({
         ref: 'Usuario',
         required: true
     },
+    img: {
+        type: String,
+    },
     precio: {
         type: Number,
         default: 0

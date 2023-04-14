@@ -51,12 +51,25 @@ const existeProductoPorId = async( id ) => {
     }
 }
 
+//validar colecciones permitidas
+//Como esta validacion resive dos valores por parametros debemos devolver true
+const coleccionesPermitidas = (coleccion = '', colecciones = []) => {
+
+    const incluida = colecciones.includes(coleccion);
+
+    if(!incluida) {
+        throw new Error(`La coleccion ${coleccion} no es permitida, ${colecciones}`)
+    }
+
+    return true;
+}
 
 module.exports = {
     esRoleValido,
     emailExiste,
     existeUsuarioPorId,
     existeCategoriaPorId,
-    existeProductoPorId
+    existeProductoPorId,
+    coleccionesPermitidas
 }
 

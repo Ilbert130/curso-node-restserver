@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
-const subirArchivo = (files, extencionesValidas = ['png', 'jpg', 'jpeg', 'gif'], carpeta = '') => {
+const subirArchivo = (files, extencionesValidas = ['png', 'jpg', 'jpeg', 'gif', 'img'], carpeta = '') => {
 
     //Creando una promesa para manejar la creacion de archivo
     return new Promise((resolve, reject) => {
