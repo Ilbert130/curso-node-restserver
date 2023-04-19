@@ -5,7 +5,7 @@ const miFormulario = document.querySelector('form');
 
 
 
-
+//Autenticacion manual
 miFormulario.addEventListener('submit', ev => {
     //Evetiar el refresh
     ev.preventDefault();
@@ -32,6 +32,7 @@ miFormulario.addEventListener('submit', ev => {
         }
 
         localStorage.setItem('token', token);
+        window.location = 'chat.html'; //Redireccionando
     })
     .catch(err => {
         console.log(err);
@@ -58,7 +59,7 @@ function handleCredentialResponse(response) {
         .then(({token}) => {
             
             localStorage.setItem('token', token);
-
+            window.location = 'chat.html';
         })
         .catch(console.warn);
 }

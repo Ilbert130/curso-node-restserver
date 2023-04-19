@@ -1,9 +1,8 @@
 const { response, request } = require('express');
 const jwt = require('jsonwebtoken');
-
 const Usuario = require('../models/usuario');
 
-
+//Middleware
 const validarJWT = async( req = request, res = response, next ) => {
 
     const token = req.header('x-token');
@@ -49,8 +48,37 @@ const validarJWT = async( req = request, res = response, next ) => {
 }
 
 
+const comprobarJWT = async( token = '') => {
+
+    try {
+
+        if(token.length < 10){
+            return null;
+        }
+
+        const { uid } = jwt.verify( token, process.env.secretOrPrivateKey );
+
+        const usuario = await Usuario.findById(uid);
+
+        if(usuario){
+            if(usuario.estado){
+                return usuario;
+
+            }else{
+                return null
+            }
+        }else{
+            return null;
+        }
+        
+    } catch (error) {
+        return null;
+    }
+}
+
 
 
 module.exports = {
-    validarJWT
+    validarJWT,
+    comprobarJWT
 }
