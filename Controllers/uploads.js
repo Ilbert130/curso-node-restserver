@@ -43,9 +43,10 @@ const mostrarImagen = async(req=request, res= response) => {
             return res.status(500).json({msg: 'Se me olvido validar esto'});
     }
 
-    //Limpiar imagenes previas
+    //Validando si tiene alguna imagen
     if(modelo.img){
         //Devolviendo la imagen
+        console.log(__dirname);
         pathImagen = path.join(__dirname, '../uploads', coleccion, modelo.img);
         if(fs.existsSync(pathImagen)){
             return res.sendFile(pathImagen);

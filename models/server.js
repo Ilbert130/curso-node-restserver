@@ -1,14 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
-
+const { createServer } = require('http');
 const { dbConnection } = require('../database/config');
+const { socketController } = require('../sockets/controller');
+
 
 class Server {
 
     constructor() {
         this.app  = express();
         this.port = process.env.PORT;
+        this.server = createServer(this.app);
+        this.io = require('socket.io')(this.server);
 
         this.paths = {
             auth:       '/api/auth',
@@ -19,7 +23,6 @@ class Server {
             uploads:    '/api/uploads'
         }
 
-
         // Conectar a base de datos
         this.conectarDB();
 
@@ -28,6 +31,9 @@ class Server {
 
         // Rutas de mi aplicación
         this.routes();
+
+        //Sockets
+        this.sockets();
     }
 
     async conectarDB() {
@@ -47,7 +53,7 @@ class Server {
         this.app.use( express.static('public') );
 
         //FileUpload - Manejar carga de archivos
-        // Note that this option available for versions 1.0.0 and newer. 
+        //Note that this option available for versions 1.0.0 and newer. 
         this.app.use(fileUpload({
             useTempFiles : true,
             tempFileDir : '/tmp/',
@@ -66,15 +72,18 @@ class Server {
         this.app.use( this.paths.uploads, require('../routes/uploads'));
     }
 
+    sockets() {
+        this.io.on('connection', socketController);
+    }
+
+
+    //Esta escuchando el server y no el app
     listen() {
-        this.app.listen( this.port, () => {
+        this.server.listen( this.port, () => {
             console.log('Servidor corriendo en puerto', this.port );
         });
     }
 
 }
-
-
-
 
 module.exports = Server;
