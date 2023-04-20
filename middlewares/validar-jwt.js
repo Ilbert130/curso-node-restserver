@@ -47,7 +47,7 @@ const validarJWT = async( req = request, res = response, next ) => {
 
 }
 
-
+//Validar el JWT en el socket
 const comprobarJWT = async( token = '') => {
 
     try {

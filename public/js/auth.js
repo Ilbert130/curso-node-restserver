@@ -41,7 +41,7 @@ miFormulario.addEventListener('submit', ev => {
 });
 
 
-
+//Actenticacion con google
 function handleCredentialResponse(response) {
 
     const body = {id_token: response.credential};

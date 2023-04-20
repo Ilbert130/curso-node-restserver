@@ -10,7 +10,7 @@ const { googleVerify } = require('../helpers/google-verify');
 
 
 
-
+//GET: Renovar token
 const renovarToken = async (req, res = response) => {
     
     const {usuario} = req;
